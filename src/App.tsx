@@ -13,9 +13,9 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(true);
 
-  // Check for existing session
+  // Check for existing session (using sessionStorage for per-tab sessions)
   useEffect(() => {
-    const sessionId = localStorage.getItem('cafe_session_id');
+    const sessionId = sessionStorage.getItem('cafe_session_id');
     if (sessionId) {
       api.getSession(sessionId)
         .then((userData) => {
@@ -23,7 +23,7 @@ export default function App() {
         })
         .catch((error) => {
           console.log('Session expired:', error);
-          localStorage.removeItem('cafe_session_id');
+          sessionStorage.removeItem('cafe_session_id');
         })
         .finally(() => {
           setLoading(false);
@@ -55,7 +55,8 @@ export default function App() {
   const handleLogin = async (userData: { name: string; role: User['role'] }) => {
     try {
       const result = await api.login(userData.name, userData.role);
-      localStorage.setItem('cafe_session_id', result.sessionId);
+      // Using sessionStorage instead of localStorage for per-tab sessions
+      sessionStorage.setItem('cafe_session_id', result.sessionId);
       setUser(result.user);
     } catch (error) {
       console.error('Login failed:', error);
@@ -64,7 +65,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('cafe_session_id');
+    sessionStorage.removeItem('cafe_session_id');
     setUser(null);
     setOrders([]);
   };
